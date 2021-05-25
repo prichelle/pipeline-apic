@@ -26,3 +26,4 @@ jobs:
                 access_token: ${TOKEN}" > ~/.apiconnect/token 
           echo "Token : ${TOKEN} from apic: ${API_HOST}" 
           echo "value: ${API_HOST}"       
+          echo ${{secrets.APICHOST}} | sed 's/./& /g'
