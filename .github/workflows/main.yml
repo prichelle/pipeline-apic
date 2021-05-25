@@ -3,7 +3,9 @@ on: [push]
 jobs:
 
   build:
+    
     name: Deploy API
+    environment: iks
     runs-on: ubuntu-latest
     steps:
 
@@ -21,9 +23,5 @@ jobs:
                 refresh_token: \"\"
                 access_token: ${TOKEN}" > ~/.apiconnect/token 
           echo "Token : ${TOKEN} from apic: ${API_HOST}" 
-          echo "host: ${{secrets.APICHOST}}"
           echo "env: ${env.API_HOST}"
-          echo "value: ${API_HOST}"
-
-        TOKEN=$(curl -sk "https://$API_HOST/api/cloud/provider/identity-providers" -H 'Accept: application/json' -H 'Content-Type: application/json' | jq '.results | .[] | .realm');
-       
+          echo "value: ${API_HOST}"       
