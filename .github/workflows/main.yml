@@ -100,16 +100,15 @@ jobs:
         cat $productfile
         cat $apifile
 
-        publish_response=$(curl -sk "https://$API_HOST/api/catalogs/$ORG_NAME/$CAT_NAME/publish"\
+        curl -sk "https://$API_HOST/api/catalogs/$ORG_NAME/$CAT_NAME/publish"\
         -H "Accept: application/json"\
         --compressed\
         -H "authorization: Bearer $SESS_TOKEN"\
         -H "content-type: multipart/form-data"\
         -H "Connection: keep-alive"\
         --form "product=@$productfile;type=application/json"\
-        --form "openapi=@$apifile;type=application/json");
+        --form "openapi=@$apifile;type=application/json"
         
-        echo $publish_response
 
 
         fi
