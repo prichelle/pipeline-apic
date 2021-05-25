@@ -1,0 +1,185 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "title" : "ACEPaymentsAPI",
+    "version" : "1.0.0",
+    "description" : "ACEPaymentsAPI"
+  },
+  "paths" : {
+    "/payments/{id}" : {
+      "get" : {
+        "operationId" : "getId",
+        "responses" : {
+          "200" : {
+            "description" : "The operation was successful.",
+            "schema" : {
+              "$ref" : "#/definitions/payment"
+            }
+          }
+        },
+        "produces" : [ "application/json" ],
+        "description" : "Retrieve id",
+        "parameters" : [ {
+          "required" : true,
+          "name" : "id",
+          "in" : "path",
+          "type" : "string"
+        } ]
+      },
+      "delete" : {
+        "operationId" : "deleteId",
+        "responses" : {
+          "200" : {
+            "description" : "The operation was successful."
+          }
+        },
+        "produces" : [ "application/json" ],
+        "description" : "Remove from id",
+        "parameters" : [ {
+          "required" : true,
+          "name" : "id",
+          "in" : "path",
+          "type" : "string"
+        } ]
+      }
+    },
+    "/payments" : {
+      "post" : {
+        "operationId" : "postPayments",
+        "responses" : {
+          "200" : {
+            "description" : "The operation was successful.",
+            "schema" : {
+              "$ref" : "#/definitions/statusresponse"
+            }
+          }
+        },
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "description" : "Insert a payments",
+        "parameters" : [ {
+          "name" : "body",
+          "in" : "body",
+          "schema" : {
+            "$ref" : "#/definitions/paymentRequest"
+          },
+          "description" : "The request body for the operation",
+          "required" : true
+        } ]
+      },
+      "get" : {
+        "operationId" : "getPayments",
+        "responses" : {
+          "200" : {
+            "description" : "The operation was successful.",
+            "schema" : {
+              "$ref" : "#/definitions/payments"
+            }
+          }
+        },
+        "produces" : [ "application/json" ],
+        "description" : "Retrieve payments"
+      },
+      "delete" : {
+        "operationId" : "deletePayments",
+        "responses" : {
+          "200" : {
+            "description" : "The operation was successful."
+          }
+        },
+        "produces" : [ "application/json" ],
+        "description" : "Remove from payments"
+      }
+    },
+    "/payments/execute" : {
+      "post" : {
+        "operationId" : "postExecute",
+        "responses" : {
+          "200" : {
+            "description" : "The operation was successful.",
+            "schema" : {
+              "$ref" : "#/definitions/statusresponse"
+            }
+          }
+        },
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "description" : "Insert a execute",
+        "parameters" : [ {
+          "name" : "body",
+          "in" : "body",
+          "schema" : {
+            "$ref" : "#/definitions/execute"
+          },
+          "description" : "The request body for the operation",
+          "required" : true
+        } ]
+      }
+    }
+  },
+  "basePath" : "/paymentsapi/v1",
+  "definitions" : {
+    "payment" : {
+      "type" : "object",
+      "properties" : {
+        "sender" : {
+          "type" : "string"
+        },
+        "benificiary" : {
+          "type" : "string"
+        },
+        "amount" : {
+          "type" : "integer"
+        },
+        "state" : {
+          "type" : "string"
+        },
+        "id" : {
+          "type" : "string"
+        }
+      },
+      "required" : [ "benificiary", "amount" ]
+    },
+    "statusresponse" : {
+      "type" : "object",
+      "properties" : {
+        "state" : {
+          "type" : "string"
+        },
+        "id" : {
+          "type" : "string"
+        }
+      }
+    },
+    "execute" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "string"
+        }
+      }
+    },
+    "paymentRequest" : {
+      "type" : "object",
+      "properties" : {
+        "sender" : {
+          "type" : "string"
+        },
+        "beneficiary" : {
+          "type" : "string"
+        },
+        "amount" : {
+          "type" : "integer"
+        }
+      }
+    },
+    "payments" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/payment"
+      }
+    }
+  },
+  "schemes" : [ "http" ],
+  "host" : "ace-paymentsapi-backend-http-ace.cp4i-2021-fra02-5b7e0d81360e5972646d63308bd04bf7-0000.eu-de.containers.appdomain.cloud"
+}

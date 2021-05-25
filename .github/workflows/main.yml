@@ -34,10 +34,80 @@ jobs:
     - name: Publish new API
       env: 
         API_HOST: ${{ secrets.APICHOST}}
+        ORG_NAME: ${{ secrets.ORG_NAME}}
+        CAT_NAME: ${{ secrets.CAT_NAME}}
       run: |
         echo "the saved token: ${{ env.token }}"
         echo "the saved test: ${{ env.test }}"
         mkdir tmp
-        ls publishapi/*.yaml > tmp/list_apis.txt
-        echo "list files"
+        ls publishapi/*.json > tmp/list_apis.txt
+
+        echo "openAPI files to check for publishing"
         cat tmp/list_apis.txt
+
+        apilist_response=$(
+          curl -sk "https://$API_HOST/api/catalogs/$ORG_NAME/$CAT_NAME/apis"\
+          -H "Accept: application/json"\
+          --compressed\
+          -H "authorization: Bearer ${{ env.token }}"\
+          -H "content-type: multipart/form-data"\
+          -H "Connection: keep-alive");
+
+        echo $apilist_response | jq '.results | .[] | (.name + ":" + .version)' | sed 's/"//g' > tmp/outputapi.txt
+
+        echo "API already published ... "
+        cat tmp/outputapi.txt
+
+        echo "processing openAPI files ... "
+        for value in $(awk '{print $1}' tmp/list_apis.txt); do
+
+        apifilename=`basename $value .json`;
+
+        apiname=`cat $value | jq .info.title | sed 's/"//g' | awk '{print tolower($0)}'`
+        apiversion=`cat $value | jq .info.version | sed 's/"//g'`
+
+        if grep -q $apiname:$apiversion tmp/outputapi.txt; then
+
+        echo $apiname:$apiversion " found in file" $value "--> not published"
+
+        else
+        echo "to publish: " $apiname:$apiversion " in file" $value
+
+
+        echo --------
+        echo API to be published:
+        echo $apiname":"$apiversion
+        echo openAPI file used
+        echo $apifilename
+        echo --------
+
+        productfile=tmp/"$apifilename"-prd.json
+        apifile=tmp/$apifilename.json
+
+        jq '. + {"x-ibm-configuration":{"type": "rest", "phase": "realized", "enforced": false, "testable": true, "cors": {"enabled": true}}}' $value | jq ' .info |= . + {"x-ibm-name":"'$apiname'"}'> $apifile
+        # cp $value tmp/"$apifilename".json
+        echo "preparing product file"
+        sed "s#API_YAML_FILE_NAME#$apiname#g;" product.tmpl > $productfile
+
+
+        echo ---------
+        echo Publish Product with files
+        echo ---------
+        echo $productfile
+        echo $apifile
+
+        #publish_response=$(curl -sk "https://$API_HOST/api/catalogs/$ORG_NAME/$CAT_NAME/publish"\
+        -H "Accept: application/json"\
+        --compressed\
+        -H "authorization: Bearer ${{env.token}}"\
+        -H "content-type: multipart/form-data"\
+        -H "Connection: keep-alive"\
+        --form "product=@$productfile;type=application/json"\
+        --form "openapi=@$apifile;type=application/json"
+        #);
+        
+        echo $publish_response
+
+
+        fi
+        done;
