@@ -86,7 +86,7 @@ jobs:
         apifile=tmp/$apifilename.json
 
         jq '. + {"x-ibm-configuration":{"type": "rest", "phase": "realized", "enforced": false, "testable": true, "cors": {"enabled": true}}}' $value | jq ' .info |= . + {"x-ibm-name":"'$apiname'"}'> $apifile
-        # cp $value tmp/"$apifilename".json
+   
         echo "preparing product file"
         sed "s#API_YAML_FILE_NAME#$apiname#g; s#API_VERSION#$apiversion#g" product.tmpl > $productfile
 
@@ -102,13 +102,13 @@ jobs:
 
         echo "url: https://$API_HOST/api/catalogs/$ORG_NAME/$CAT_NAME/publish"
         
-        curl -sk "https://$API_HOST/api/catalogs/$ORG_NAME/$CAT_NAME/publish"\
-        -H "Accept: application/json"\
-        --compressed\
-        -H "authorization: Bearer $SESS_TOKEN"\
-        -H "content-type: multipart/form-data"\
-        -H "Connection: keep-alive"\
-        --form "product=@$productfile;type=application/json"\
+        curl -sk "https://$API_HOST/api/catalogs/$ORG_NAME/$CAT_NAME/publish" \
+        -H "Accept: application/json" \
+        --compressed \
+        -H "authorization: Bearer $SESS_TOKEN" \
+        -H "content-type: multipart/form-data" \
+        -H "Connection: keep-alive" \
+        --form "product=@$productfile;type=application/json" \
         --form "openapi=@$apifile;type=application/json"
         
 
