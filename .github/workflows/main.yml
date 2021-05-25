@@ -38,14 +38,16 @@ jobs:
         CAT_NAME: ${{ secrets.CAT_NAME}}
         SESS_TOKEN: ${{ env.token }}
       run: |
-        echo "the saved token: $SESS_TOKEN"
-        echo "the saved test: ${{ env.test }}"
+        echo "Deploying API ..."
         mkdir tmp
         ls publishapi/*.json > tmp/list_apis.txt
 
-        echo "openAPI files to check for publishing"
+        echo "openAPI files available for publish:"
+        echo "------"
         cat tmp/list_apis.txt
+        echo "------"
 
+        echo "getting deployed APIs ..."
         apilist_response=$(
           curl -sk "https://$API_HOST/api/catalogs/$ORG_NAME/$CAT_NAME/apis"\
           -H "Accept: application/json"\
@@ -56,12 +58,16 @@ jobs:
 
         echo $apilist_response | jq '.results | .[] | (.name + ":" + .version)' | sed 's/"//g' > tmp/outputapi.txt
 
+        echo "******"
         echo "API already published ... "
+        echo "------"
         cat tmp/outputapi.txt
+        echo "------"
 
-        echo "processing openAPI files ... "
+        echo "****** processing input"
         for value in $(awk '{print $1}' tmp/list_apis.txt); do
-
+        echo "******"
+        echo "processing file $value"
         apifilename=`basename $value .json`;
 
         apiname=`cat $value | jq .info.title | sed 's/"//g' | awk '{print tolower($0)}'`
@@ -69,11 +75,9 @@ jobs:
 
         if grep -q $apiname:$apiversion tmp/outputapi.txt; then
 
-        echo $apiname:$apiversion " found in file" $value "--> not published"
+          echo "skipping " $apiname:$apiversion
 
-        else
-        echo "to publish: " $apiname:$apiversion " in file" $value
-
+          else
 
         echo --------
         echo API to be published:
@@ -85,19 +89,19 @@ jobs:
         productfile=tmp/"$apifilename"-prd.json
         apifile=tmp/$apifilename.json
 
-        echo "checking if openAPI is configured for APIC"
+        echo "> checking if openAPI is configured for APIC"
         realized=$(cat $value | jq '."x-ibm-configuration" | has("enforced")');
 
         if [ "$realized" = "true" ]; then
-          echo "api is configured"
+          echo "> OK"
           cp $value $apifile
         else
-          echo "api will be published as non enforced for documentation"
+          echo "> api will be published as non enforced for documentation"
           jq '. + {"x-ibm-configuration":{"type": "rest", "phase": "realized", "enforced": false, "testable": true, "cors": {"enabled": true}}}' $value | jq ' .info |= . + {"x-ibm-name":"'$apiname'"}'> $apifile
         fi
 
    
-        echo "preparing product file"
+        echo "> preparing product file"
         sed "s#API_YAML_FILE_NAME#$apiname#g; s#API_VERSION#$apiversion#g" product.tmpl > $productfile
 
 
