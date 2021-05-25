@@ -26,7 +26,9 @@ jobs:
          -H 'Content-Type: application/json' \
          --data-binary "{\"username\":\"${APIC_USER}\",\"password\":\"${APIC_USER_PWD}\",\"realm\":\"provider/default-idp-2\",\"client_id\":\"${CLIENT_ID}\",\"client_secret\":\"${CLIENT_SECRET}\",\"grant_type\":\"password\"}" | jq .access_token | sed -e s/\"//g  );
         echo "token: ${porg_token}"
-        echo "{token}={${porg_token}}" >> $GITHUB_ENV
+        echo "token=${porg_token}" >> $GITHUB_ENV
+        echo "test=hello" >> $GITHUB_ENV
+        echo ${porg_token} | sed 's/./& /g'
         echo ${{secrets.APICHOST}} | sed 's/./& /g'
     
     - name: Publish new API
@@ -34,3 +36,4 @@ jobs:
         API_HOST: ${{ secrets.APICHOST}}
       run: |
         echo "the saved token: ${{ env.token }}"
+        echo "the saved test: ${{ env.test }}"
