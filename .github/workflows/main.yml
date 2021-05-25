@@ -36,8 +36,9 @@ jobs:
         API_HOST: ${{ secrets.APICHOST}}
         ORG_NAME: ${{ secrets.ORG_NAME}}
         CAT_NAME: ${{ secrets.CAT_NAME}}
+        SESS_TOKEN: ${{ env.token }}
       run: |
-        echo "the saved token: ${{ env.token }}"
+        echo "the saved token: $SESS_TOKEN"
         echo "the saved test: ${{ env.test }}"
         mkdir tmp
         ls publishapi/*.json > tmp/list_apis.txt
@@ -49,7 +50,7 @@ jobs:
           curl -sk "https://$API_HOST/api/catalogs/$ORG_NAME/$CAT_NAME/apis"\
           -H "Accept: application/json"\
           --compressed\
-          -H "authorization: Bearer ${{ env.token }}"\
+          -H "authorization: Bearer $SESS_TOKEN"\
           -H "content-type: multipart/form-data"\
           -H "Connection: keep-alive");
 
