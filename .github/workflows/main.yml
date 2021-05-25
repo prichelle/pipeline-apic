@@ -14,14 +14,15 @@ jobs:
 
     - name: Get IAM token
       env:
-        API_KEY: ${{ secrets.APICHOST }}
-        API_HOST: api.${{ secrets.APICHOST}}
+        CLIENT_ID: ${{ secrets.CLIENT_ID }}
+        API_HOST: ${{ secrets.APICHOST}}
       run: |
         mkdir ~/.apiconnect/
         touch ~/.apiconnect/token
+         TOKEN=$(curl -sk "https://$API_HOST/api/cloud/provider/identity-providers" -H 'Accept: application/json' -H 'Content-Type: application/json' | jq '.results | .[] | .realm');
+
                   echo "${API_HOST}/api: |
                 refresh_token: \"\"
                 access_token: ${TOKEN}" > ~/.apiconnect/token 
           echo "Token : ${TOKEN} from apic: ${API_HOST}" 
-          echo "env: ${env.API_HOST}"
           echo "value: ${API_HOST}"       
