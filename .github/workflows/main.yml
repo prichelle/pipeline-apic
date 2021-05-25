@@ -2,7 +2,7 @@ name: Deploy API
 on: [push]
 jobs:
 
-  build:
+  publish:
     
     name: Deploy API
     environment: iks
@@ -10,20 +10,27 @@ jobs:
     steps:
 
     - name: Check out code
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
 
-    - name: Get IAM token
+    - name: Get API token
       env:
         CLIENT_ID: ${{ secrets.CLIENT_ID }}
+        CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+        APIC_USER: ${{ secrets.APIC_USER}}
+        APIC_USER_PWD: ${{ secrets.APIC_USER_PWD}}
         API_HOST: ${{ secrets.APICHOST}}
       run: |
-        mkdir ~/.apiconnect/
-        touch ~/.apiconnect/token
-         TOKEN=$(curl -sk "https://$API_HOST/api/cloud/provider/identity-providers" -H 'Accept: application/json' -H 'Content-Type: application/json' | jq '.results | .[] | .realm');
-
-                  echo "${API_HOST}/api: |
-                refresh_token: \"\"
-                access_token: ${TOKEN}" > ~/.apiconnect/token 
-          echo "Token : ${TOKEN} from apic: ${API_HOST}" 
-          echo "value: ${API_HOST}"       
-          echo ${{secrets.APICHOST}} | sed 's/./& /g'
+        porg_token=$(curl -sk "https://$API_HOST/api/token" \
+         -H 'Accept: application/json' \
+         -H 'Cache-Control: no-cache' \
+         -H 'Content-Type: application/json' \
+         --data-binary "{\"username\":\"${APIC_USER}\",\"password\":\"${APIC_USER_PWD}\",\"realm\":\"provider/default-idp-2\",\"client_id\":\"${CLIENT_ID}\",\"client_secret\":\"${CLIENT_SECRET}\",\"grant_type\":\"password\"}" | jq .access_token | sed -e s/\"//g  );
+        echo "token: ${porg_token}"
+        echo "{token}={${porg_token}}" >> $GITHUB_ENV
+        echo ${{secrets.APICHOST}} | sed 's/./& /g'
+    
+    - name: Publish new API
+      env: 
+        API_HOST: ${{ secrets.APICHOST}}
+      run: |
+        echo "the saved token: ${{ env.token }}"
