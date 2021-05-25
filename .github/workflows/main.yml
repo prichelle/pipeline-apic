@@ -85,7 +85,17 @@ jobs:
         productfile=tmp/"$apifilename"-prd.json
         apifile=tmp/$apifilename.json
 
-        jq '. + {"x-ibm-configuration":{"type": "rest", "phase": "realized", "enforced": false, "testable": true, "cors": {"enabled": true}}}' $value | jq ' .info |= . + {"x-ibm-name":"'$apiname'"}'> $apifile
+        echo "checking if openAPI is configured for APIC"
+        realized=$(cat $value | jq '."x-ibm-configuration" | has("enforced")');
+
+        if [ "$realized" = "true" ]; then
+          echo "api is configured"
+          cp $value $apifile
+        else
+          echo "api will be published as non enforced for documentation"
+          jq '. + {"x-ibm-configuration":{"type": "rest", "phase": "realized", "enforced": false, "testable": true, "cors": {"enabled": true}}}' $value | jq ' .info |= . + {"x-ibm-name":"'$apiname'"}'> $apifile
+        fi
+
    
         echo "preparing product file"
         sed "s#API_YAML_FILE_NAME#$apiname#g; s#API_VERSION#$apiversion#g" product.tmpl > $productfile
@@ -96,12 +106,7 @@ jobs:
         echo ---------
         echo $productfile
         echo $apifile
-
-        cat $productfile
-        cat $apifile
-
-        echo "url: https://$API_HOST/api/catalogs/$ORG_NAME/$CAT_NAME/publish"
-        
+       
         curl -sk "https://$API_HOST/api/catalogs/$ORG_NAME/$CAT_NAME/publish" \
         -H "Accept: application/json" \
         --compressed \
