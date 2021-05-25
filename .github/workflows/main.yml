@@ -17,9 +17,13 @@ jobs:
       run: |
         mkdir ~/.apiconnect/
         touch ~/.apiconnect/token
-        TOKEN=$(curl -sk "https://$API_HOST/api/cloud/provider/identity-providers" -H 'Accept: application/json' -H 'Content-Type: application/json' | jq '.results | .[] | .realm');
-       
-          echo "${API_HOST}/api: |
+                  echo "${API_HOST}/api: |
                 refresh_token: \"\"
                 access_token: ${TOKEN}" > ~/.apiconnect/token 
           echo "Token : ${TOKEN} from apic: ${API_HOST}" 
+          echo "host: ${{secrets.APICHOST}}"
+          echo "env: ${env.API_HOST}"
+          echo "value: ${API_HOST}"
+
+        TOKEN=$(curl -sk "https://$API_HOST/api/cloud/provider/identity-providers" -H 'Accept: application/json' -H 'Content-Type: application/json' | jq '.results | .[] | .realm');
+       
