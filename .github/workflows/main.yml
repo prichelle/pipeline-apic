@@ -37,3 +37,7 @@ jobs:
       run: |
         echo "the saved token: ${{ env.token }}"
         echo "the saved test: ${{ env.test }}"
+        mkdir tmp
+        ls publishapi/*.yaml > tmp/list_apis.txt
+        echo "list files"
+        cat tmp/list_apis.txt
