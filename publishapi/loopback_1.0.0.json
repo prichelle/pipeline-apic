@@ -43,7 +43,7 @@
     },
     "properties": {
       "target-url": {
-        "value": "http://example.com/operation-name",
+        "value": "http://star.com/operation-name",
         "description": "The URL of the target service",
         "encoded": false
       }
